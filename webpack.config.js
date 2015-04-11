@@ -8,6 +8,7 @@
 var _ = require('lodash');
 var webpack = require('webpack');
 var argv = require('minimist')(process.argv.slice(2));
+var SaveAssetsJson = require('assets-webpack-plugin');
 
 var DEBUG = !argv.release;
 
@@ -100,16 +101,16 @@ var config = {
 var appConfig = _.merge({}, config, {
   entry: './src/app.js',
   output: {
-    filename: 'app.js'
+    filename: 'app.[hash].js'
   },
   plugins: config.plugins.concat([
       new webpack.DefinePlugin(_.merge(GLOBALS, {'__SERVER__': false}))
-    ].concat(DEBUG ? [] : [
+    ]).concat(DEBUG ? [] : [
       new webpack.optimize.DedupePlugin(),
       new webpack.optimize.UglifyJsPlugin(),
-      new webpack.optimize.AggressiveMergingPlugin()
-    ])
-  )
+      new webpack.optimize.AggressiveMergingPlugin(),
+    ]).concat(new SaveAssetsJson({filename: 'assets.json', path: './build'}))
+  
 });
 
 //
